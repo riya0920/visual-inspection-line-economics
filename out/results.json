@@ -1,0 +1,208 @@
+{
+  "data": {
+    "train": 1400,
+    "normal_only_for_anomaly": 1400,
+    "test_known": 900,
+    "test_unseen": 450,
+    "test_variant_D": 450,
+    "test_lighting_shift": 450,
+    "known_classes": [
+      "pore",
+      "crack",
+      "shrinkage"
+    ],
+    "unseen_class": "inclusion",
+    "train_defect_rate": 0.3442857142857143
+  },
+  "detection": {
+    "known defects": {
+      "n": 900,
+      "defect_rate": 0.35444444444444445,
+      "supervised_auroc": 0.8815791603494137,
+      "anomaly_auroc": 0.847727677391159,
+      "anomaly_pixel_auroc": 0.8763748630092831
+    },
+    "UNSEEN defect (crack)": {
+      "n": 450,
+      "defect_rate": 0.47555555555555556,
+      "supervised_auroc": 0.9584191351180105,
+      "anomaly_auroc": 0.9883771582448915,
+      "anomaly_pixel_auroc": 0.9989638537554931
+    },
+    "new product variant D": {
+      "n": 450,
+      "defect_rate": 0.34,
+      "supervised_auroc": 0.7907616469707973,
+      "anomaly_auroc": 0.7789001122334456,
+      "anomaly_pixel_auroc": 0.8485170320642393
+    },
+    "lighting + jitter shift": {
+      "n": 450,
+      "defect_rate": 0.3511111111111111,
+      "supervised_auroc": 0.7999826599618519,
+      "anomaly_auroc": 0.8192951274492803,
+      "anomaly_pixel_auroc": 0.8770122309437101
+    }
+  },
+  "prevalence": {
+    "supervised": [
+      {
+        "prevalence": 0.005,
+        "sensitivity": 0.6990595611285266,
+        "specificity": 0.9707401032702238,
+        "ppv": 0.10718847725730928,
+        "npv": 0.9984445771863512,
+        "good_parts_rejected_per_1000": 29.113597246127366,
+        "defects_escaping_per_1000": 1.5047021943573669
+      },
+      {
+        "prevalence": 0.02,
+        "sensitivity": 0.6990595611285266,
+        "specificity": 0.9707401032702238,
+        "ppv": 0.3277669559057907,
+        "npv": 0.9937130142498698,
+        "good_parts_rejected_per_1000": 28.67469879518072,
+        "defects_escaping_per_1000": 6.018808777429467
+      },
+      {
+        "prevalence": 0.1,
+        "sensitivity": 0.6990595611285266,
+        "specificity": 0.9707401032702238,
+        "ppv": 0.7263721477826989,
+        "npv": 0.9667012931188882,
+        "good_parts_rejected_per_1000": 26.333907056798623,
+        "defects_escaping_per_1000": 30.09404388714734
+      },
+      {
+        "prevalence": 0.5,
+        "sensitivity": 0.6990595611285266,
+        "specificity": 0.9707401032702238,
+        "ppv": 0.9598254633813877,
+        "npv": 0.7633521714780306,
+        "good_parts_rejected_per_1000": 14.629948364888124,
+        "defects_escaping_per_1000": 150.47021943573668
+      }
+    ],
+    "anomaly": [
+      {
+        "prevalence": 0.005,
+        "sensitivity": 0.6520376175548589,
+        "specificity": 0.9707401032702238,
+        "ppv": 0.10070456865481969,
+        "npv": 0.9982019793533332,
+        "good_parts_rejected_per_1000": 29.113597246127366,
+        "defects_escaping_per_1000": 1.7398119122257056
+      },
+      {
+        "prevalence": 0.02,
+        "sensitivity": 0.6520376175548589,
+        "specificity": 0.9707401032702238,
+        "ppv": 0.31261204164780443,
+        "npv": 0.9927378066804611,
+        "good_parts_rejected_per_1000": 28.67469879518072,
+        "defects_escaping_per_1000": 6.9592476489028225
+      },
+      {
+        "prevalence": 0.1,
+        "sensitivity": 0.6520376175548589,
+        "specificity": 0.9707401032702238,
+        "ppv": 0.7123161710530194,
+        "npv": 0.9616976543220874,
+        "good_parts_rejected_per_1000": 26.333907056798623,
+        "defects_escaping_per_1000": 34.79623824451411
+      },
+      {
+        "prevalence": 0.5,
+        "sensitivity": 0.6520376175548589,
+        "specificity": 0.9707401032702238,
+        "ppv": 0.9570526882657142,
+        "npv": 0.7361327621549301,
+        "good_parts_rejected_per_1000": 14.629948364888124,
+        "defects_escaping_per_1000": 173.98119122257054
+      }
+    ]
+  },
+  "cost_sweep": [
+    {
+      "threshold": 0.29140010476112366,
+      "sensitivity": 0.64576802507837,
+      "specificity": 1.0,
+      "false_reject_rate": 0.0,
+      "ppv": 1.0,
+      "expected_cost": 14169.278996865203,
+      "cost_ratio": 10.0,
+      "c_escape": 40.0
+    },
+    {
+      "threshold": 0.29140010476112366,
+      "sensitivity": 0.64576802507837,
+      "specificity": 1.0,
+      "false_reject_rate": 0.0,
+      "ppv": 1.0,
+      "expected_cost": 70846.394984326,
+      "cost_ratio": 50.0,
+      "c_escape": 200.0
+    },
+    {
+      "threshold": 0.22689707577228546,
+      "sensitivity": 0.6739811912225705,
+      "specificity": 0.9896729776247849,
+      "false_reject_rate": 0.0103270223752151,
+      "ppv": 0.24696471537225198,
+      "expected_cost": 138627.833321643,
+      "cost_ratio": 100.0,
+      "c_escape": 400.0
+    },
+    {
+      "threshold": 0.12492363899946213,
+      "sensitivity": 0.7774294670846394,
+      "specificity": 0.8984509466437177,
+      "false_reject_rate": 0.10154905335628228,
+      "ppv": 0.03704569289313933,
+      "expected_cost": 347917.6859700334,
+      "cost_ratio": 300.0,
+      "c_escape": 1200.0
+    },
+    {
+      "threshold": 0.04041973873972893,
+      "sensitivity": 0.9968652037617555,
+      "specificity": 0.0636833046471601,
+      "false_reject_rate": 0.9363166953528399,
+      "ppv": 0.0053216128313665866,
+      "expected_cost": 757847.2744538387,
+      "cost_ratio": 1000.0,
+      "c_escape": 4000.0
+    }
+  ],
+  "worked_example": {
+    "volume_per_day": 200000,
+    "false_reject_rate": 0.03,
+    "scrap_cost_each": 4.0,
+    "prevalence": 0.005,
+    "recall": 0.98,
+    "good_parts_scrapped_per_day": 5970.0,
+    "daily_cost_of_false_rejects": 23880.0,
+    "annual_cost": 5970000.0,
+    "defects_caught_per_day": 980.0,
+    "defects_escaping_per_day": 20.000000000000018,
+    "ppv": 0.14100719424460423
+  },
+  "takt": {
+    "parts_per_minute": 60.0,
+    "takt_ms": 1000.0,
+    "inference_ms": 196.50363699911378,
+    "margin_ms": 803.4963630008863,
+    "utilisation_pct": 19.650363699911377,
+    "fits": true,
+    "max_parts_per_minute_supported": 305.3378599820552,
+    "stages": {
+      "supervised p50": 25.12794999347534,
+      "supervised p99": 63.147878997551736,
+      "anomaly p50": 48.39255000115372,
+      "anomaly p99": 133.90318600169832,
+      "combined p50": 72.48074999370147,
+      "combined p99": 196.50363699911378
+    }
+  },
+  "wall_seconds": 849.8145770000119
+}
