@@ -1,13 +1,17 @@
 # ML-2 — Visual Defect Detection with Line Economics
 
-**Status: ~20% slice.** The two-detector comparison, the prevalence arithmetic, the
-cost-matrix operating point, and the takt-time budget are built and measured. MVTec
-AD, segmentation, the review-station UI, and the operator-override loop are not.
+**Status: ~50% slice.** The two-detector comparison, the prevalence arithmetic, the
+cost-matrix operating point, the takt-time budget, the two-stage cascade, Grad-CAM,
+the operator-override log, and multi-seed confidence intervals are built and
+measured. MVTec AD, segmentation, PatchCore, and the review-station UI are not.
 
 ```bash
 python run_inspect.py            # ~14 min on CPU
 python run_inspect.py --quick
 python run_inspect.py --report-only
+
+python extend.py                 # ~17 min: cascade, Grad-CAM, override log, 3-seed CIs
+python budget_probe.py           # ~50 min: six training runs behind the correction below
 ```
 
 Writes [docs/RESULTS.md](docs/RESULTS.md) and `out/results.json`.
@@ -95,10 +99,18 @@ not slack to be spent — it has to absorb acquisition, transfer, the p99 tail r
 than the mean, and reject-mechanism actuation before the part reaches the diverter.
 Quoting a model's latency without the takt time is quoting half a sentence.
 
-## The part that failed: the unseen-defect experiment
+## The part that failed, and then un-failed: the unseen-defect experiment
 
-This was meant to be the project's other differentiator, and **it did not work —
-twice.** The report leads with that rather than burying it.
+> **Corrected by the second pass.** This section originally concluded that the
+> experiment did not work. That conclusion came from a **single training run**, and
+> it does not survive three. The methodology critique in *Attempt 1* below still
+> stands and is still the most useful thing here. *Attempt 2*'s verdict does not —
+> see [the correction](#the-correction-attempt-2-was-under-powered-not-refuted)
+> below and §1b of [docs/EXTENSIONS.md](docs/EXTENSIONS.md).
+
+This was meant to be the project's other differentiator, and on the first pass it
+appeared not to work **twice**. The report led with that rather than burying it —
+which was the right instinct applied to a number that had not earned it.
 
 | test set | supervised AUROC | anomaly AUROC | anomaly pixel AUROC |
 |---|---|---|---|
@@ -127,12 +139,42 @@ scale, edge profile and context in ways this generator does not reproduce — an
 published finding that supervised models generalise poorly to unseen defect types
 is measured on real imagery, not on anything like this.
 
-So the structural argument for the two-stage architecture still holds — a
-supervised model cannot be *relied* on outside its training distribution — but
-**this project provides no evidence for it**, and the recommendation should be read
-as reasoning rather than as a result. Demonstrating it properly needs MVTec.
-
 Attempt 1's numbers are kept in `out/results_crack_holdout.json`.
+
+### The correction: attempt 2 was under-powered, not refuted
+
+The paragraph that used to sit here said the structural argument for the two-stage
+architecture held as *reasoning* but that **this project provides no evidence for
+it**. That was wrong, and the way it was wrong is worth more than the original
+finding.
+
+`python budget_probe.py` re-runs attempt 2 at three seeds under both training
+budgets. At *this table's own budget* (1400 images, 14 epochs):
+
+| | supervised: known → unseen | anomaly: known → unseen |
+|---|---|---|
+| 1400 imgs / 14 ep, 3 seeds | 0.888 → **0.740** (−0.147) | 0.863 → **0.951** (+0.088) |
+| 1100 imgs / 12 ep, 3 seeds | 0.877 → **0.779** (−0.098) | 0.843 → **0.956** (+0.113) |
+
+**The supervised head loses AUROC on a class it never saw and the anomaly head
+gains it** — which is precisely the effect the table above reported as absent. The
+0.958 in that table is a single draw from a distribution with **sd 0.096**, about
+2.3σ high. The anomaly head wins on the held-out class in **6 of 6 runs** (smallest
+gap +0.098; sign test one-sided p = 0.016).
+
+Two things I am deliberately *not* upgrading on the strength of this:
+
+- **The effect size is not pinned down.** With three seeds the gap's 95% interval at
+  the larger budget is +0.210 ± 0.241, which includes zero. The sign test is
+  distribution-free and is the claim I will defend; the magnitude is not.
+- **The synthetic-data caveat below still applies.** The generator renders every
+  defect as a local deviation from a smooth background, so this is a weaker test of
+  novelty than real imagery. MVTec is still the right way to settle it.
+
+The transferable lesson is cheap and general: **a single-seed model comparison was
+strong enough to become this project's headline negative finding, and it was
+wrong.** Nothing about it looked fragile — a clean AUROC on a clean holdout is
+exactly what a defensible number looks like.
 
 ## What the anomaly head does win on
 
@@ -161,30 +203,77 @@ shift in it signals whatever the cause. That connects ML monitoring to the quali
 system the plant already runs — and DATA-2 in this portfolio is the chart engine
 that would do it. **The two are not wired together.**
 
-## What is NOT built (the other 80%)
+## Built in the second pass — see [docs/EXTENSIONS.md](docs/EXTENSIONS.md)
+
+```bash
+python extend.py          # ~17 min on CPU
+python budget_probe.py    # ~50 min; six training runs
+```
+
+Four gaps this README named, and the run **overturned the README's own headline
+finding** (above) and **refuted two arguments this README made for the cascade**:
+
+- **Confidence intervals.** Every AUROC here was a point estimate from one run.
+  Three seeds, 95% t-intervals, and the finding is the *spread*: unseen-class
+  supervised AUROC has sd 0.096 at this project's training budget, which is what
+  made the single-seed headline unreliable.
+- **The cascade, actually wired.** Three verdicts, not two — and
+  `FLAG_FOR_REVIEW` (stage 1 sure something is wrong, stage 2 unable to name it) is
+  the disposition an unseen defect should get. A two-outcome system forces the
+  operator to pick a wrong class to clear the screen, which fills the override log
+  with garbage and poisons the retraining set.
+  **But the throughput argument this README made for the cascade collapses.**
+  Holding 99% stage-1 recall flags 93.9% of parts at line prevalence, so stage 2
+  runs on nearly everything and the saving is **2.5%** — a rounding error against
+  takt. The full recall-vs-cost-vs-escapes sweep is in EXTENSIONS.md. The honest
+  conclusion is narrower than the one I set out to write: **right architecture,
+  wrong model** — and that is the quantitative case for PatchCore and a pretrained
+  backbone, rather than a preference for them.
+- **Grad-CAM, and what it fails at.** The supervised head had zero localisation.
+  It now has some, and *some* is the accurate word: the peak lands inside the true
+  defect mask **3.3%** of the time against a 0.80% base rate. That is 4× chance and
+  still wrong nineteen times in twenty, which makes it unusable as an operator aid —
+  a localisation overlay that is usually wrong teaches operators to distrust the
+  overlay and then the call it came with. The cause is the image-level training
+  objective, not Grad-CAM: **an attribution method cannot manufacture spatial
+  evidence the model never used.**
+- **The operator-override log.** 1009 parts reviewed, operator-confirmed PPV 0.309
+  — measured on the *flagged subset*, so it is an upper bound on line PPV rather
+  than an estimate of it, and conflating the two is how a dashboard reports healthy
+  precision on a line that is scrapping good parts. The log is retraining gold
+  because of its sampling (labels on exactly the hard parts) and a trap for the
+  same reason (censored to what stage 1 flagged).
+
+## What is NOT built (the other 50%)
 
 1. **No MVTec AD.** The spec's named benchmark, and its absence means no number
    here is comparable to the literature — and, as above, it is why the
    unseen-defect experiment could not be made to work.
 2. **No segmentation model.** The anomaly head produces a heat map from patch
-   Mahalanobis distances; there is no supervised segmentation head and no
-   Grad-CAM on the classifier, so the supervised path has zero localisation.
-3. **No review-station UI and no operator-override loop.** The spec calls the
-   logged disposition "retraining gold and a quality-system requirement". Neither
-   the UI nor the disposition log exists.
+   Mahalanobis distances and the supervised head now has Grad-CAM, but Grad-CAM hits
+   the true defect only 3.3% of the time, so the supervised path still has no
+   *usable* localisation. Fixing that is a segmentation or patch-supervision job,
+   not a Grad-CAM tuning exercise.
+3. **No review-station UI.** The disposition log now exists and is simulated end
+   to end, but there is no UI, and the simulated operator is treated as ground
+   truth — which is generous, since a real operator is a measurement system with
+   its own repeatability and reproducibility.
 4. **No PatchCore.** `PatchAnomaly` is a PaDiM-style per-patch Gaussian, not a
    coreset memory bank, and there is no pretrained backbone — features come from
    the small CNN trained here, which is weaker than an ImageNet backbone and is
    the main reason the absolute AUROCs are modest.
-5. **No two-stage pipeline actually wired.** The architecture is argued for and
-   both stages are timed together, but there is no cascade implementation with a
-   screening threshold feeding the classifier.
+5. **No retraining loop.** The cascade is wired and the override log is
+   populated, but nothing consumes the log: there is no retraining trigger, no
+   censoring correction for the fact that the log only contains what stage 1
+   flagged, and no re-qualification gate before a new model reaches the line.
 6. **No inspection API, no serving, no container.**
 7. **Gauge-R&R equivalent not built.** The spec asks for repeatability on repeated
    images, reproducibility across stations, and a golden-sample set. Only the
    concept is discussed.
-8. **One model, one seed, no confidence intervals.** Every AUROC here is a point
-   estimate from a single training run.
+8. **Three seeds, not thirty.** Intervals exist now, and at the larger training
+   budget they are wide enough to be uninformative about effect size (the unseen
+   gap is +0.210 ± 0.241). The sign test carries the qualitative claim; pinning
+   down the magnitude needs more runs than this.
 
 ## Layout
 
@@ -192,5 +281,8 @@ that would do it. **The two are not wired together.**
 src/synth.py       textured casting generator, 4 variants x 4 defect classes, pixel masks
 src/models.py      supervised CNN; PaDiM-style patch anomaly head fitted on normals only
 src/economics.py   prevalence tables, cost-matrix threshold search, takt budget
+src/cascade.py     three-verdict cascade, screen-threshold choice, Grad-CAM, override log
 run_inspect.py     orchestration; writes docs/RESULTS.md
+extend.py          second pass; writes docs/EXTENSIONS.md
+budget_probe.py    seed x training-budget sweep; writes out/budget_probe.json
 ```

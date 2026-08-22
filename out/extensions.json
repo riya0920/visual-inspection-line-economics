@@ -1,0 +1,131 @@
+{
+  "seeds": [
+    11,
+    22,
+    33
+  ],
+  "seed_ci": {
+    "known_supervised_auroc": {
+      "mean": 0.8774506073994246,
+      "half_width": 0.016458603435538316,
+      "n": 3,
+      "sd": 0.006625479480421196,
+      "lo": 0.8609920039638863,
+      "hi": 0.8939092108349629
+    },
+    "known_anomaly_auroc": {
+      "mean": 0.8427530886860334,
+      "half_width": 0.023323531611087384,
+      "n": 3,
+      "sd": 0.009388984958866307,
+      "lo": 0.819429557074946,
+      "hi": 0.8660766202971207
+    },
+    "unseen_supervised_auroc": {
+      "mean": 0.7794640713377999,
+      "half_width": 0.0508384106405589,
+      "n": 3,
+      "sd": 0.020465214307852534,
+      "lo": 0.728625660697241,
+      "hi": 0.8303024819783589
+    },
+    "unseen_anomaly_auroc": {
+      "mean": 0.9558845091201604,
+      "half_width": 0.036071795290468174,
+      "n": 3,
+      "sd": 0.014520851690423758,
+      "lo": 0.9198127138296922,
+      "hi": 0.9919563044106287
+    }
+  },
+  "unseen_gap_ci": {
+    "mean": 0.1764204377823606,
+    "half_width": 0.020016425889897112,
+    "n": 3,
+    "sd": 0.00805769575312374,
+    "lo": 0.1564040118924635,
+    "hi": 0.1964368636722577
+  },
+  "cascade_recall_sweep": [
+    {
+      "target_recall": 0.999,
+      "achieved_recall": 0.995850622406639,
+      "good_parts_flagged": 0.9607843137254902,
+      "line_screen_rate": 0.9609803921568628
+    },
+    {
+      "target_recall": 0.99,
+      "achieved_recall": 0.9875518672199171,
+      "good_parts_flagged": 0.9389978213507625,
+      "line_screen_rate": 0.9393028322440087
+    },
+    {
+      "target_recall": 0.95,
+      "achieved_recall": 0.950207468879668,
+      "good_parts_flagged": 0.7777777777777778,
+      "line_screen_rate": 0.7788888888888889
+    },
+    {
+      "target_recall": 0.9,
+      "achieved_recall": 0.9004149377593361,
+      "good_parts_flagged": 0.6492374727668845,
+      "line_screen_rate": 0.6509912854030501
+    },
+    {
+      "target_recall": 0.8,
+      "achieved_recall": 0.8008298755186722,
+      "good_parts_flagged": 0.41830065359477125,
+      "line_screen_rate": 0.4212091503267974
+    }
+  ],
+  "cascade": {
+    "screen_threshold": 9.897923469543457,
+    "classify_threshold": 0.29264137148857117,
+    "known": {
+      "counts": {
+        "FLAG_FOR_REVIEW": 452,
+        "REJECT_CLASSIFIED": 217,
+        "ACCEPT": 31
+      },
+      "screen_rate": 0.9557142857142857
+    },
+    "unseen": {
+      "counts": {
+        "FLAG_FOR_REVIEW": 239,
+        "REJECT_CLASSIFIED": 101,
+        "ACCEPT": 10
+      },
+      "screen_rate": 0.9714285714285714
+    },
+    "known_stage1_recall": 0.9875518672199171,
+    "unseen_stage1_recall": 1.0,
+    "known_stage1_false_flag": 0.9389978213507625,
+    "throughput": {
+      "stage1_ms": 12.111289062886499,
+      "stage2_ms": 8.276659375042072,
+      "screen_rate": 0.9393028322440087,
+      "cascade_avg_ms": 19.885578655382446,
+      "always_both_ms": 20.38794843792857,
+      "saving_pct": 2.46405264401957
+    },
+    "line_screen_rate_at_0.5pct_prevalence": 0.9393028322440087
+  },
+  "gradcam": {
+    "n_images": 120,
+    "peak_inside_mask_pct": 3.3333333333333335,
+    "random_baseline_pct": 0.8006286621093751
+  },
+  "override": {
+    "n_reviewed": 1009,
+    "by_disposition": {
+      "FALSE_REJECT": 597,
+      "CONFIRMED_DEFECT": 267,
+      "UNCLASSIFIED": 145
+    },
+    "operator_confirmed_ppv": 0.3090277777777778,
+    "unclassified_rate": 0.14370664023785926,
+    "escaped_defects_known": 3,
+    "escaped_defects_unseen": 0
+  },
+  "wall_seconds": 1018.2630552999908
+}
