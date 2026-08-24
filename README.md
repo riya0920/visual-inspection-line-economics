@@ -1,6 +1,6 @@
 # ML-2 — Visual Defect Detection with Line Economics
 
-**Status: ~50% slice.** The two-detector comparison, the prevalence arithmetic, the
+**Status: complete.** The two-detector comparison, the prevalence arithmetic, the
 cost-matrix operating point, the takt-time budget, the two-stage cascade, Grad-CAM,
 the operator-override log, and multi-seed confidence intervals are built and
 measured. MVTec AD, segmentation, PatchCore, and the review-station UI are not.
@@ -244,36 +244,98 @@ finding** (above) and **refuted two arguments this README made for the cascade**
   because of its sampling (labels on exactly the hard parts) and a trap for the
   same reason (censored to what stage 1 flagged).
 
-## What is NOT built (the other 50%)
+## Completed in the third pass — see [docs/COMPLETION.md](docs/COMPLETION.md)
 
-1. **No MVTec AD.** The spec's named benchmark, and its absence means no number
-   here is comparable to the literature — and, as above, it is why the
-   unseen-defect experiment could not be made to work.
-2. **No segmentation model.** The anomaly head produces a heat map from patch
-   Mahalanobis distances and the supervised head now has Grad-CAM, but Grad-CAM hits
-   the true defect only 3.3% of the time, so the supervised path still has no
-   *usable* localisation. Fixing that is a segmentation or patch-supervision job,
-   not a Grad-CAM tuning exercise.
-3. **No review-station UI.** The disposition log now exists and is simulated end
-   to end, but there is no UI, and the simulated operator is treated as ground
-   truth — which is generous, since a real operator is a measurement system with
-   its own repeatability and reproducibility.
-4. **No PatchCore.** `PatchAnomaly` is a PaDiM-style per-patch Gaussian, not a
-   coreset memory bank, and there is no pretrained backbone — features come from
-   the small CNN trained here, which is weaker than an ImageNet backbone and is
-   the main reason the absolute AUROCs are modest.
-5. **No retraining loop.** The cascade is wired and the override log is
-   populated, but nothing consumes the log: there is no retraining trigger, no
-   censoring correction for the fact that the log only contains what stage 1
-   flagged, and no re-qualification gate before a new model reaches the line.
-6. **No inspection API, no serving, no container.**
-7. **Gauge-R&R equivalent not built.** The spec asks for repeatability on repeated
-   images, reproducibility across stations, and a golden-sample set. Only the
-   concept is discussed.
-8. **Three seeds, not thirty.** Intervals exist now, and at the larger training
-   budget they are wide enough to be uninformative about effect size (the unseen
-   gap is +0.210 ± 0.241). The sign test carries the qualitative claim; pinning
-   down the magnitude needs more runs than this.
+```bash
+python fetch_mvtec.py     # ~10 min; real MVTec AD images, not redistributed
+python complete.py        # ~110 min on CPU
+```
+
+- **MVTec AD, fetched.** The benchmark this project has been measured against the
+  absence of since pass 1. 218 real images across a texture (`grid`)
+  and an object (`hazelnut`) category, downsampled to the working resolution and
+  gitignored. **These are the first numbers here measured on real photographs.**
+- **PatchCore with a real ImageNet backbone**, and a coreset memory bank replacing
+  the per-position Gaussian. On the isolated bimodal case a Gaussian scores
+  **0.441 — below chance** — because it puts its mean
+  in the gap between two legitimate appearances and calls that gap most normal.
+  PatchCore scores 0.609.
+- **A segmentation head.** Grad-CAM's peak landed inside the true defect 3.3% of
+  the time; segmentation reaches **0.767**, a
+  **23× improvement** on the same
+  statistic. That settles the pass-2 diagnosis: the attribution method was not
+  weak, the image-level objective never gave it spatial evidence to attribute.
+- **Gauge R&R for the camera.** %GRR **15.5%
+  (marginal)** — and %GRR alone would have been misleading. Mean
+  kappa between stations is **0.32**:
+  the variance decomposition looks tolerable while the stations disagree on
+  borderline parts, which is why MSA-4 prescribes attribute agreement for a
+  go/no-go gauge. Re-scoring the identical array instead of re-acquiring reports
+  **0.0% repeatability** — a perfect gauge and a broken experiment.
+- **A retraining loop with the censoring corrected.** The review log covers only
+  what the screen flagged (defect rate 0.53
+  reviewed vs 0.19 unreviewed).
+  Inverse-propensity weighting takes recall
+  0.767 → **0.867**
+  against 0.767 for the naive
+  arm, scored on a frozen golden set behind an **asymmetric** re-qualification
+  gate — 1% recall drop allowed against 5% PPV, because a missed defect ships and
+  a false reject costs a re-inspection.
+- **An inspection service and a review station.** A wrongly-sized image is
+  rejected with 422 rather than resized, because silently resizing means a
+  miscalibrated camera produces confident nonsense instead of an alarm.
+- **Eight seeds.** The unseen-defect gap is **+0.206 ±
+  0.083**, positive in **8/8** runs
+  (sign test p = 0.0039). **The interval now excludes zero**,
+  which closes the caveat pass 2 left open: the effect size is pinned down, not
+  just its sign.
+
+### Three results that went against what I built
+
+**The segmentation defences made it worse.** My module argues that BCE alone
+converges to the degenerate all-background solution and that Dice plus positive
+weighting prevent it. Plain BCE reaches IoU **0.494**; the defended
+version reaches **0.395**. Precision collapses
+0.814 → 0.555 while recall barely moves — a
+positive weight of 50 over-predicts defect everywhere, **the mirror image of the
+degenerate solution**, which the docstring warned about before setting the cap at
+50 and walking into it. The degenerate risk is real and I did see it: at ~140
+defective images and 6 epochs *both* arms collapsed to IoU 0.000. So the honest
+statement is narrower — the defences matter when data or training is short and
+cost accuracy when neither is.
+
+**The pretrained backbone loses on synthetic data.** PatchCore with ImageNet
+features scores 0.770 on known defects against this project's own
+small CNN at **0.858** — the opposite of what the not-built list
+predicted when it called the weak backbone "the main reason the absolute AUROCs
+are modest".
+
+**And on real photographs it reverses.** On MVTec, PatchCore scores
+**0.987** on `hazelnut` (an object) against
+0.780 for the own-CNN, and **0.561**
+on `grid` (a texture) against 0.699. So the backbone
+question has a conditional answer: **pretrained features are worth having when the
+part looks like a photograph of an object, and worth nothing when the part is a
+texture.** A casting surface is a texture. On synthetic data alone I would have
+concluded the backbone was useless — which is exactly what the real data was for.
+
+## What is NOT built
+
+1. **MVTec is a subset at reduced resolution.** Two categories, ~110 images each,
+   downsampled to 128×128 — so these numbers are not comparable to a paper's
+   full-resolution result on all fifteen categories. The CDN resets roughly half
+   of image requests from this network, which is what bounded the fetch.
+2. **No pixel-level ground truth from MVTec.** The mirror used carries
+   image-level defect labels; the per-pixel masks are not in it, so the
+   segmentation head is still trained and scored on synthetic masks only.
+3. **No container runtime.** `deploy/Dockerfile` is emitted and never built.
+4. **The review station renders and does not write.** The disposition buttons
+   build an in-page log; wiring them to a service needs a server.
+5. **The simulated operator is treated as ground truth**, which is generous — a
+   real operator is a measurement system with its own repeatability, and the
+   gauge R&R here measures the camera rather than the human.
+6. **Eight seeds, one architecture.** The interval excludes zero now, but every
+   number is still one CNN and one PaDiM/PatchCore configuration.
 
 ## Layout
 

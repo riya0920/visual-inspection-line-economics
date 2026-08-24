@@ -6,3 +6,9 @@ __pycache__/
 *.db-shm
 *.onnx
 out/*.log
+
+# MVTec AD: fetched by fetch_mvtec.py, CC BY-NC-SA, not redistributed
+data/MVTEC/
+
+deploy/
+out/review_station.html

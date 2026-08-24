@@ -84,7 +84,17 @@ class InspectCNN(nn.Module):
 
 
 def train_supervised(x: np.ndarray, y: np.ndarray, epochs: int = 12,
-                     batch: int = 64, lr: float = 2e-3, verbose: bool = False):
+                     batch: int = 64, lr: float = 2e-3, verbose: bool = False,
+                     sample_weight: np.ndarray | None = None):
+    """`sample_weight` carries the inverse-propensity correction.
+
+    A review log is CENSORED -- it holds only the parts the screen flagged -- so a
+    reviewed part flagged with probability p stands for 1/p parts like itself.
+    Passing those weights here is what stops a retrained model inheriting the
+    screen's blind spots. It composes with the class weighting below rather than
+    replacing it: the two correct different biases (which parts got LOOKED at, and
+    how many of each CLASS there are), and dropping either reintroduces its own.
+    """
     torch.manual_seed(SEED)
     model = InspectCNN()
     opt = torch.optim.Adam(model.parameters(), lr=lr)
@@ -94,8 +104,10 @@ def train_supervised(x: np.ndarray, y: np.ndarray, epochs: int = 12,
     # calibrated to a prevalence that does not exist on any line.
     w = torch.tensor([1.0, float((y == 0).sum() / max(1, (y == 1).sum()))],
                      dtype=torch.float32)
-    lossf = nn.CrossEntropyLoss(weight=w)
+    lossf = nn.CrossEntropyLoss(weight=w, reduction="none")
     xt, yt = torch.from_numpy(x), torch.from_numpy(y)
+    sw = (torch.ones(len(xt)) if sample_weight is None
+          else torch.tensor(np.asarray(sample_weight, dtype=np.float32)))
     t0 = time.perf_counter()
     for ep in range(epochs):
         model.train()
@@ -104,7 +116,8 @@ def train_supervised(x: np.ndarray, y: np.ndarray, epochs: int = 12,
         for b in range(0, len(xt), batch):
             j = perm[b:b + batch]
             opt.zero_grad()
-            loss = lossf(model(xt[j]), yt[j])
+            per = lossf(model(xt[j]), yt[j])
+            loss = (per * sw[j]).sum() / sw[j].sum().clamp_min(1e-9)
             loss.backward()
             opt.step()
             tot += float(loss.detach()) * len(j)
