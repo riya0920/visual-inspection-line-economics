@@ -382,7 +382,7 @@ pass is what made an interrupted fetch worth nothing.
 
 ## What is NOT built
 
-1. **686 images is still a subset at reduced resolution.** Full MVTec
+1. **911 images is still a subset at reduced resolution.** Full MVTec
    AD is ~5,400 images across 15 categories at 1024×1024; this is capped per
    split and downsampled to 128×128, which removes exactly the fine detail the
    hardest defects live in. Every number here is a lower bound on what the same
