@@ -3,7 +3,7 @@
 **Status: complete.** The two-detector comparison, the prevalence arithmetic, the
 cost-matrix operating point, the takt-time budget, the two-stage cascade, Grad-CAM,
 the operator-override log, and multi-seed confidence intervals are built and
-measured. MVTec AD, segmentation, PatchCore, and the review-station UI are not.
+measured, as are MVTec AD, segmentation, PatchCore and the review station.
 
 ```bash
 python run_inspect.py            # ~14 min on CPU
@@ -319,23 +319,92 @@ part looks like a photograph of an object, and worth nothing when the part is a
 texture.** A casting surface is a texture. On synthetic data alone I would have
 concluded the backbone was useless — which is exactly what the real data was for.
 
+## Built in the fourth pass — see [docs/LARGER_MVTEC.md](docs/LARGER_MVTEC.md)
+
+```bash
+python fetch_mvtec.py            # resumable; run it again if it stops
+python fetch_mvtec.py --from-cache   # build the .npz from whatever arrived
+python run_pass4.py
+```
+
+**911 images across 6 categories**, against 218
+across two in pass 3 — and the reason for wanting more was not size. It was a
+confound.
+
+Pass 3 reported PatchCore's ImageNet backbone **losing** to a small CNN on this
+project's synthetic data (0.770 vs 0.858) and **winning** on real photographs
+(hazelnut 0.987 vs 0.780), and attributed the difference to real-versus-synthetic.
+Two categories cannot support that: `grid` is a **texture** and `hazelnut` is an
+**object**, so the same result reads equally well as *pretrained features help on
+objects and not on textures* — a different claim with a different consequence for
+anybody choosing a detector.
+
+| category | kind | train | test | PatchCore | own CNN | Δ |
+|---|---|---:|---:|---:|---:|---:|
+| bottle | object | 92 | 83 | 0.997 | 0.977 | **+0.020** |
+| carpet | texture | 71 | 94 | 0.890 | 0.423 | **+0.467** |
+| grid | texture | 88 | 65 | 0.534 | 0.752 | **-0.217** |
+| hazelnut | object | 82 | 82 | 0.956 | 0.714 | **+0.241** |
+| screw | object | 59 | 70 | 0.550 | 0.274 | **+0.276** |
+| transistor | object | 65 | 60 | 0.962 | 0.799 | **+0.163** |
+
+**Neither attribution survives.** The per-category deltas span **0.685** while the
+gap between the two group means is **0.050** — the between-category variation is
+**14×** the between-group difference, and the two textures point in opposite
+directions: `carpet` is PatchCore's largest win and `grid` its only loss.
+
+Pass 3 attributed the effect to real-versus-synthetic; pass 4 hypothesised
+texture-versus-object; **the data supports neither**. What it shows is that
+PatchCore beats a small CNN on 5 of these 6 categories and loses badly on
+one, and which one is not predicted by either axis. The honest answer is
+per-category — which is also the answer that is useless for choosing a detector
+in advance, and saying so is better than reporting whichever grouping happens to
+separate. The group means are kept in the table above precisely because they look
+conclusive and are not: *textures +0.125, objects +0.175* reads as "PatchCore
+wins everywhere", which is the opposite of what `grid` says.
+
+`screw` is the category published results score worst on, and both detectors are
+near chance on it — PatchCore barely above (0.550), the small CNN well **below**
+(0.274). A sub-0.5 AUROC is not a weak detector; it is one ranking defects as
+*more normal* than normals, the same failure this project recorded in pass 3 when
+PaDiM scored 0.441 on bimodal normality.
+
+### The fetch had to become resumable
+
+The mirror's CDN resets a large fraction of requests from this network, and the
+six-category fetch died part-way through its second category on the first
+attempt. Each decoded image is now cached under `data/MVTEC/cache/` keyed by its
+remote path, with a sidecar index carrying category, split and defect — so a
+rerun costs nothing for what already arrived, `--from-cache` builds a usable
+dataset from a **partial** fetch, and the earlier pass-3 subset is merged in
+rather than silently dropped. Writing the dataset only at the end of a complete
+pass is what made an interrupted fetch worth nothing.
+
 ## What is NOT built
 
-1. **MVTec is a subset at reduced resolution.** Two categories, ~110 images each,
-   downsampled to 128×128 — so these numbers are not comparable to a paper's
-   full-resolution result on all fifteen categories. The CDN resets roughly half
-   of image requests from this network, which is what bounded the fetch.
-2. **No pixel-level ground truth from MVTec.** The mirror used carries
-   image-level defect labels; the per-pixel masks are not in it, so the
-   segmentation head is still trained and scored on synthetic masks only.
-3. **No container runtime.** `deploy/Dockerfile` is emitted and never built.
-4. **The review station renders and does not write.** The disposition buttons
+1. **686 images is still a subset at reduced resolution.** Full MVTec
+   AD is ~5,400 images across 15 categories at 1024×1024; this is capped per
+   split and downsampled to 128×128, which removes exactly the fine detail the
+   hardest defects live in. Every number here is a lower bound on what the same
+   method does at full resolution, and none of it is comparable to a published
+   result.
+2. **Nine of MVTec's fifteen categories are still absent**, including every
+   remaining texture (leather, tile, wood) and several objects. The six here were
+   chosen to span texture/object and easy/hard; they are not a sample of the
+   benchmark, and the per-category result above is exactly the kind of finding
+   that could look different on the other nine.
+3. **No pixel-level ground truth from MVTec.** The mirror carries image-level
+   defect labels; the per-pixel masks are not in it, so the segmentation head is
+   still trained and scored on synthetic masks only.
+4. **No container runtime.** `deploy/Dockerfile` is emitted and never built.
+5. **The review station renders and does not write.** The disposition buttons
    build an in-page log; wiring them to a service needs a server.
-5. **The simulated operator is treated as ground truth**, which is generous — a
+6. **The simulated operator is treated as ground truth**, which is generous — a
    real operator is a measurement system with its own repeatability, and the
    gauge R&R here measures the camera rather than the human.
-6. **Eight seeds, one architecture.** The interval excludes zero now, but every
-   number is still one CNN and one PaDiM/PatchCore configuration.
+7. **One architecture against one architecture.** Both at settings chosen for
+   this project. The texture/object result is evidence about these two detectors
+   on this data, not a benchmark finding.
 
 ## Layout
 
@@ -344,7 +413,11 @@ src/synth.py       textured casting generator, 4 variants x 4 defect classes, pi
 src/models.py      supervised CNN; PaDiM-style patch anomaly head fitted on normals only
 src/economics.py   prevalence tables, cost-matrix threshold search, takt budget
 src/cascade.py     three-verdict cascade, screen-threshold choice, Grad-CAM, override log
+src/patchcore.py   ResNet patch features, coreset selection, memory-bank scoring
+src/segmentation.py  the U-Net head and the Dice/BCE comparison
+fetch_mvtec.py     resumable MVTec fetch with a per-image cache and --from-cache
 run_inspect.py     orchestration; writes docs/RESULTS.md
 extend.py          second pass; writes docs/EXTENSIONS.md
 budget_probe.py    seed x training-budget sweep; writes out/budget_probe.json
+run_pass4.py       the five-category comparison; writes docs/LARGER_MVTEC.md
 ```

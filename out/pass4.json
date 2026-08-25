@@ -1,0 +1,182 @@
+{
+  "n_images": 911,
+  "categories": [
+    "bottle",
+    "carpet",
+    "grid",
+    "hazelnut",
+    "screw",
+    "transistor"
+  ],
+  "rows": [
+    {
+      "category": "bottle",
+      "kind": "object",
+      "n_train": 92,
+      "n_test": 83,
+      "defect_rate": 0.7590361445783133,
+      "defect_types": [
+        "broken_large",
+        "broken_small",
+        "contamination"
+      ],
+      "patchcore_auroc": 0.9968253968253968,
+      "patchcore_ci": [
+        0.9887990462666425,
+        1.0
+      ],
+      "own_cnn_auroc": 0.976984126984127,
+      "own_cnn_ci": [
+        0.9441109625668449,
+        1.0
+      ],
+      "delta": 0.019841269841269882,
+      "train_share_of_median": 1.2026143790849673,
+      "undertrained": false
+    },
+    {
+      "category": "carpet",
+      "kind": "texture",
+      "n_train": 71,
+      "n_test": 94,
+      "defect_rate": 0.7340425531914894,
+      "defect_types": [
+        "color",
+        "cut",
+        "metal_contamination",
+        "thread"
+      ],
+      "patchcore_auroc": 0.8904347826086957,
+      "patchcore_ci": [
+        0.8296799575994782,
+        0.9480737781954888
+      ],
+      "own_cnn_auroc": 0.42318840579710143,
+      "own_cnn_ci": [
+        0.30515136988667774,
+        0.540803855325914
+      ],
+      "delta": 0.46724637681159426,
+      "train_share_of_median": 0.9281045751633987,
+      "undertrained": false
+    },
+    {
+      "category": "grid",
+      "kind": "texture",
+      "n_train": 88,
+      "n_test": 65,
+      "defect_rate": 0.7076923076923077,
+      "defect_types": [
+        "bent",
+        "broken",
+        "glue",
+        "metal_contamination",
+        "thread"
+      ],
+      "patchcore_auroc": 0.534324942791762,
+      "patchcore_ci": [
+        0.3776451380427353,
+        0.6933964149504195
+      ],
+      "own_cnn_auroc": 0.7517162471395881,
+      "own_cnn_ci": [
+        0.6051678108314263,
+        0.8764557253107191
+      ],
+      "delta": -0.21739130434782605,
+      "train_share_of_median": 1.1503267973856208,
+      "undertrained": false
+    },
+    {
+      "category": "hazelnut",
+      "kind": "object",
+      "n_train": 82,
+      "n_test": 82,
+      "defect_rate": 0.573170731707317,
+      "defect_types": [
+        "crack",
+        "cut",
+        "hole",
+        "print"
+      ],
+      "patchcore_auroc": 0.9556231003039514,
+      "patchcore_ci": [
+        0.9068208723560981,
+        0.9880280410534151
+      ],
+      "own_cnn_auroc": 0.7142857142857143,
+      "own_cnn_ci": [
+        0.598961817168339,
+        0.8273891103830313
+      ],
+      "delta": 0.24133738601823707,
+      "train_share_of_median": 1.0718954248366013,
+      "undertrained": false
+    },
+    {
+      "category": "screw",
+      "kind": "object",
+      "n_train": 59,
+      "n_test": 70,
+      "defect_rate": 0.7142857142857143,
+      "defect_types": [
+        "manipulated_front",
+        "scratch_neck",
+        "thread_top"
+      ],
+      "patchcore_auroc": 0.55,
+      "patchcore_ci": [
+        0.4003887269193392,
+        0.7379190962099123
+      ],
+      "own_cnn_auroc": 0.274,
+      "own_cnn_ci": [
+        0.1747480817793318,
+        0.3936554465942221
+      ],
+      "delta": 0.276,
+      "train_share_of_median": 0.7712418300653595,
+      "undertrained": false
+    },
+    {
+      "category": "transistor",
+      "kind": "object",
+      "n_train": 65,
+      "n_test": 60,
+      "defect_rate": 0.36666666666666664,
+      "defect_types": [
+        "bent_lead",
+        "cut_lead",
+        "damaged_case",
+        "misplaced"
+      ],
+      "patchcore_auroc": 0.9617224880382775,
+      "patchcore_ci": [
+        0.8962637362637362,
+        1.0
+      ],
+      "own_cnn_auroc": 0.7990430622009569,
+      "own_cnn_ci": [
+        0.6581111111111111,
+        0.9133597883597883
+      ],
+      "delta": 0.16267942583732065,
+      "train_share_of_median": 0.8496732026143791,
+      "undertrained": false
+    }
+  ],
+  "backbone": true,
+  "quick": false,
+  "elapsed_s": 375.66992449760437,
+  "texture_mean_delta": 0.1249275362318841,
+  "texture_patchcore_wins": 1,
+  "texture_n": 2,
+  "object_mean_delta": 0.1749645204242069,
+  "object_patchcore_wins": 4,
+  "object_n": 4,
+  "patchcore_wins": 5,
+  "n_graded": 6,
+  "undertrained": [],
+  "delta_spread": 0.6846376811594204,
+  "group_gap": 0.0500369841923228
+}
