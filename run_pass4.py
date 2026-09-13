@@ -8,7 +8,7 @@ synthetic data (0.770 vs 0.858) and **won** decisively on real photographs
 Two categories cannot support that attribution, because the two axes are
 confounded in them: `grid` is a texture and `hazelnut` is an object. So the
 finding could equally be *pretrained features help on objects and not on
-textures* — a completely different claim with a different consequence for anyone
+textures*: a completely different claim with a different consequence for anyone
 choosing a detector.
 
 Six categories separate them:
@@ -187,7 +187,7 @@ def report(d: dict) -> str:
     A("Two categories cannot support that. `grid` is a **texture** and "
       "`hazelnut` is an **object**, so the two axes were confounded: the same "
       "result reads equally well as *pretrained features help on objects and not "
-      "on textures* — a different claim, with a different consequence for "
+      "on textures*, a different claim, with a different consequence for "
       "anybody choosing a detector.\n")
 
     A("\n## Per category\n")
@@ -196,11 +196,11 @@ def report(d: dict) -> str:
     for r in d["rows"]:
         if "skipped" in r:
             A(f"| {r['category']} | {r['kind']} | {r['n_train']} | "
-              f"{r['n_test']} | — | _{r['skipped']}_ | | |")
+              f"{r['n_test']} | N/A | _{r['skipped']}_ | | |")
             continue
         pc = (f"{r['patchcore_auroc']:.3f} "
               f"<sub>[{r['patchcore_ci'][0]:.2f}, {r['patchcore_ci'][1]:.2f}]</sub>"
-              if "patchcore_auroc" in r else "—")
+              if "patchcore_auroc" in r else "N/A")
         oc = (f"{r['own_cnn_auroc']:.3f} "
               f"<sub>[{r['own_cnn_ci'][0]:.2f}, {r['own_cnn_ci'][1]:.2f}]</sub>")
         dl = f"{r['delta']:+.3f}" if "delta" in r else ""
@@ -216,13 +216,13 @@ def report(d: dict) -> str:
           "a CNN trained from scratch, so a short train split hands it the win "
           "for a reason that has nothing to do with the category:\n")
         for r in [x for x in d["rows"] if x.get("undertrained")]:
-            A(f"- **`{r['category']}`** — {r['n_train']} training images, "
+            A(f"- **`{r['category']}`**: {r['n_train']} training images, "
               f"{r['train_share_of_median'] * 100:.0f}% of the median across "
               f"categories, and its own-CNN AUROC is "
               f"**{r['own_cnn_auroc']:.3f}**. At 0.500 the CNN has learned "
               "nothing, so that row measures the fetch rather than the detector.")
         A("\nIt is left in the table rather than deleted, and the fetch is "
-          "resumable — this closes by running it again, not by an argument.\n")
+          "resumable: this closes by running it again, not by an argument.\n")
 
     if d.get("texture_n") and d.get("object_n"):
         A("\n## The answer\n")
@@ -241,7 +241,7 @@ def report(d: dict) -> str:
         thin = d["texture_n"] < 2 or d["object_n"] < 2
         if thin:
             A(f"\n**Not enough categories to conclude.** {d['texture_n']} "
-              f"texture(s) and {d['object_n']} object(s) graded — the direction "
+              f"texture(s) and {d['object_n']} object(s) graded: the direction "
               "below is what the data shows and is not yet an answer.\n")
         # The spread test comes FIRST, and it has to. A group mean can be
         # positive because one category in it won enormously while another lost,
@@ -258,7 +258,7 @@ def report(d: dict) -> str:
         elif inconsistent:
             A(f"\n**Neither attribution survives.** The per-category deltas "
               f"span **{spread:.3f}** while the gap between the group means is "
-              f"**{gap:.3f}** — the between-category variation is "
+              f"**{gap:.3f}**: the between-category variation is "
               f"{spread / max(gap, 1e-9):.0f}× the between-group difference. "
               "And the two textures point in opposite directions: `carpet` is "
               "PatchCore's largest win and `grid` its only loss.\n")
@@ -267,7 +267,7 @@ def report(d: dict) -> str:
               "neither**. What it shows is that PatchCore beats a small CNN on "
               "most of these categories and loses badly on one, and which one "
               "is not predicted by either axis. The honest answer is "
-              "per-category — which is also the answer that is useless for "
+              "per-category, which is also the answer that is useless for "
               "choosing a detector in advance, and saying so is better than "
               "reporting whichever grouping happens to separate.\n")
             A("The group means are left in the table above precisely because "
@@ -278,7 +278,7 @@ def report(d: dict) -> str:
         elif obj > 0 > tex:
             A("\n**The split is by texture versus object, not by real versus "
               "synthetic.** PatchCore's pretrained features win on objects and "
-              "lose on textures, on real photographs in both cases — so pass 3's "
+              "lose on textures, on real photographs in both cases, so pass 3's "
               "attribution was wrong. An ImageNet backbone has learned what "
               "objects look like; a repeating texture is not what it was trained "
               "on, and a small CNN fitted to the texture in front of it does "
@@ -293,20 +293,20 @@ def report(d: dict) -> str:
     if hard:
         A("\n## The hard categories\n")
         for r in hard:
-            A(f"- **{r['category']}** — PatchCore {r['patchcore_auroc']:.3f}, "
+            A(f"- **{r['category']}**: PatchCore {r['patchcore_auroc']:.3f}, "
               f"own CNN {r['own_cnn_auroc']:.3f}. Defect types: "
               f"{', '.join(r['defect_types'])}.")
         names = {r["category"] for r in hard}
         if "screw" in names:
             A("\n`screw` is the category published results score worst on, and "
-              "both detectors are near chance on it — PatchCore barely above, "
+              "both detectors are near chance on it: PatchCore barely above, "
               "the small CNN well **below**. A sub-0.5 AUROC is not a weak "
               "detector, it is a detector ranking defects as more normal than "
               "normals, and it is the same failure this project already "
               "recorded when PaDiM scored 0.441 on bimodal normality.")
         if "transistor" in names:
-            A("\n`transistor`'s defects are structural — a misplaced or bent "
-              "lead — rather than surface marks, so a detector that does well "
+            A("\n`transistor`'s defects are structural, a misplaced or bent "
+              "lead, rather than surface marks, so a detector that does well "
               "on it is doing something other than finding blemishes.")
         A("")
 

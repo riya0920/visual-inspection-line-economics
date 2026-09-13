@@ -6,7 +6,7 @@
 
 Pass 3 found PatchCore's ImageNet-pretrained backbone **losing** to a small CNN trained on this project's own synthetic data (0.770 vs 0.858) and **winning** decisively on real photographs (hazelnut 0.987 vs 0.780), and attributed it to real-versus-synthetic.
 
-Two categories cannot support that. `grid` is a **texture** and `hazelnut` is an **object**, so the two axes were confounded: the same result reads equally well as *pretrained features help on objects and not on textures* — a different claim, with a different consequence for anybody choosing a detector.
+Two categories cannot support that. `grid` is a **texture** and `hazelnut` is an **object**, so the two axes were confounded: the same result reads equally well as *pretrained features help on objects and not on textures*: a different claim, with a different consequence for anybody choosing a detector.
 
 
 ## Per category
@@ -30,21 +30,21 @@ Intervals are 2.5/97.5 percentile bootstraps. A single AUROC on forty test image
 | textures | 2 | 1 | +0.125 |
 | objects | 4 | 4 | +0.175 |
 
-**Neither attribution survives.** The per-category deltas span **0.685** while the gap between the group means is **0.050** — the between-category variation is 14× the between-group difference. And the two textures point in opposite directions: `carpet` is PatchCore's largest win and `grid` its only loss.
+**Neither attribution survives.** The per-category deltas span **0.685** while the gap between the group means is **0.050**: the between-category variation is 14× the between-group difference. And the two textures point in opposite directions: `carpet` is PatchCore's largest win and `grid` its only loss.
 
-Pass 3 attributed this to real-versus-synthetic; pass 4 hypothesised texture-versus-object; **the data supports neither**. What it shows is that PatchCore beats a small CNN on most of these categories and loses badly on one, and which one is not predicted by either axis. The honest answer is per-category — which is also the answer that is useless for choosing a detector in advance, and saying so is better than reporting whichever grouping happens to separate.
+Pass 3 attributed this to real-versus-synthetic; pass 4 hypothesised texture-versus-object; **the data supports neither**. What it shows is that PatchCore beats a small CNN on most of these categories and loses badly on one, and which one is not predicted by either axis. The honest answer is per-category, which is also the answer that is useless for choosing a detector in advance, and saying so is better than reporting whichever grouping happens to separate.
 
 The group means are left in the table above precisely because they look conclusive and are not. A reader who saw only *textures +0.125, objects +0.175* would conclude PatchCore wins everywhere, which is the opposite of what `grid` says.
 
 
 ## The hard categories
 
-- **screw** — PatchCore 0.550, own CNN 0.274. Defect types: manipulated_front, scratch_neck, thread_top.
-- **transistor** — PatchCore 0.962, own CNN 0.799. Defect types: bent_lead, cut_lead, damaged_case, misplaced.
+- **screw**: PatchCore 0.550, own CNN 0.274. Defect types: manipulated_front, scratch_neck, thread_top.
+- **transistor**: PatchCore 0.962, own CNN 0.799. Defect types: bent_lead, cut_lead, damaged_case, misplaced.
 
-`screw` is the category published results score worst on, and both detectors are near chance on it — PatchCore barely above, the small CNN well **below**. A sub-0.5 AUROC is not a weak detector, it is a detector ranking defects as more normal than normals, and it is the same failure this project already recorded when PaDiM scored 0.441 on bimodal normality.
+`screw` is the category published results score worst on, and both detectors are near chance on it: PatchCore barely above, the small CNN well **below**. A sub-0.5 AUROC is not a weak detector, it is a detector ranking defects as more normal than normals, and it is the same failure this project already recorded when PaDiM scored 0.441 on bimodal normality.
 
-`transistor`'s defects are structural — a misplaced or bent lead — rather than surface marks, so a detector that does well on it is doing something other than finding blemishes.
+`transistor`'s defects are structural, a misplaced or bent lead, rather than surface marks, so a detector that does well on it is doing something other than finding blemishes.
 
 
 ## What this still does not settle
