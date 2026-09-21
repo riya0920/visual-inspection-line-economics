@@ -1,0 +1,259 @@
+{
+  "baseline": {
+    "recall": 0.5,
+    "ppv": 0.5,
+    "auroc": 0.5555555555555556
+  },
+  "arms": {
+    "one operator": {
+      "0.0": {
+        "recall": 0.5333333333333333,
+        "ppv": 0.5333333333333333,
+        "auroc": 0.6055555555555556,
+        "n_labels": 79,
+        "label_error": 0.0,
+        "gate": {
+          "passed": true,
+          "reasons": [],
+          "delta_recall": 0.033333333333333326,
+          "delta_ppv": 0.033333333333333326
+        }
+      },
+      "0.05": {
+        "recall": 0.7333333333333333,
+        "ppv": 0.7333333333333333,
+        "auroc": 0.8177777777777778,
+        "n_labels": 78,
+        "label_error": 0.02564102564102564,
+        "gate": {
+          "passed": true,
+          "reasons": [],
+          "delta_recall": 0.23333333333333328,
+          "delta_ppv": 0.23333333333333328
+        }
+      },
+      "0.1": {
+        "recall": 0.5,
+        "ppv": 0.5,
+        "auroc": 0.5900000000000001,
+        "n_labels": 80,
+        "label_error": 0.1125,
+        "gate": {
+          "passed": true,
+          "reasons": [],
+          "delta_recall": 0.0,
+          "delta_ppv": 0.0
+        }
+      },
+      "0.2": {
+        "recall": 0.5333333333333333,
+        "ppv": 0.5333333333333333,
+        "auroc": 0.6122222222222222,
+        "n_labels": 78,
+        "label_error": 0.14102564102564102,
+        "gate": {
+          "passed": true,
+          "reasons": [],
+          "delta_recall": 0.033333333333333326,
+          "delta_ppv": 0.033333333333333326
+        }
+      },
+      "0.3": {
+        "recall": 0.5333333333333333,
+        "ppv": 0.5333333333333333,
+        "auroc": 0.5877777777777777,
+        "n_labels": 77,
+        "label_error": 0.33766233766233766,
+        "gate": {
+          "passed": true,
+          "reasons": [],
+          "delta_recall": 0.033333333333333326,
+          "delta_ppv": 0.033333333333333326
+        }
+      }
+    },
+    "two, consensus only": {
+      "0.0": {
+        "recall": 0.4666666666666667,
+        "ppv": 0.4666666666666667,
+        "auroc": 0.5122222222222222,
+        "n_labels": 69,
+        "label_error": 0.0,
+        "gate": {
+          "passed": false,
+          "reasons": [
+            "recall dropped 0.033 (limit 0.01)"
+          ],
+          "delta_recall": -0.033333333333333326,
+          "delta_ppv": -0.033333333333333326
+        }
+      },
+      "0.05": {
+        "recall": 0.5666666666666667,
+        "ppv": 0.5666666666666667,
+        "auroc": 0.6111111111111112,
+        "n_labels": 68,
+        "label_error": 0.0,
+        "gate": {
+          "passed": true,
+          "reasons": [],
+          "delta_recall": 0.06666666666666665,
+          "delta_ppv": 0.06666666666666665
+        }
+      },
+      "0.1": {
+        "recall": 0.5,
+        "ppv": 0.5,
+        "auroc": 0.5944444444444444,
+        "n_labels": 62,
+        "label_error": 0.03225806451612903,
+        "gate": {
+          "passed": true,
+          "reasons": [],
+          "delta_recall": 0.0,
+          "delta_ppv": 0.0
+        }
+      },
+      "0.2": {
+        "recall": 0.4666666666666667,
+        "ppv": 0.4666666666666667,
+        "auroc": 0.5477777777777778,
+        "n_labels": 50,
+        "label_error": 0.06,
+        "gate": {
+          "passed": false,
+          "reasons": [
+            "recall dropped 0.033 (limit 0.01)"
+          ],
+          "delta_recall": -0.033333333333333326,
+          "delta_ppv": -0.033333333333333326
+        }
+      },
+      "0.3": {
+        "recall": 0.4666666666666667,
+        "ppv": 0.4666666666666667,
+        "auroc": 0.5444444444444444,
+        "n_labels": 47,
+        "label_error": 0.23404255319148937,
+        "gate": {
+          "passed": false,
+          "reasons": [
+            "recall dropped 0.033 (limit 0.01)"
+          ],
+          "delta_recall": -0.033333333333333326,
+          "delta_ppv": -0.033333333333333326
+        }
+      }
+    },
+    "two, weighted majority": {
+      "0.0": {
+        "recall": 0.5333333333333333,
+        "ppv": 0.5333333333333333,
+        "auroc": 0.5900000000000001,
+        "n_labels": 83,
+        "label_error": 0.0,
+        "gate": {
+          "passed": true,
+          "reasons": [],
+          "delta_recall": 0.033333333333333326,
+          "delta_ppv": 0.033333333333333326
+        }
+      },
+      "0.05": {
+        "recall": 0.5,
+        "ppv": 0.5,
+        "auroc": 0.6066666666666667,
+        "n_labels": 79,
+        "label_error": 0.012658227848101266,
+        "gate": {
+          "passed": true,
+          "reasons": [],
+          "delta_recall": 0.0,
+          "delta_ppv": 0.0
+        }
+      },
+      "0.1": {
+        "recall": 0.5,
+        "ppv": 0.5,
+        "auroc": 0.5422222222222223,
+        "n_labels": 73,
+        "label_error": 0.0410958904109589,
+        "gate": {
+          "passed": true,
+          "reasons": [],
+          "delta_recall": 0.0,
+          "delta_ppv": 0.0
+        }
+      },
+      "0.2": {
+        "recall": 0.5666666666666667,
+        "ppv": 0.5666666666666667,
+        "auroc": 0.6733333333333333,
+        "n_labels": 60,
+        "label_error": 0.06666666666666667,
+        "gate": {
+          "passed": true,
+          "reasons": [],
+          "delta_recall": 0.06666666666666665,
+          "delta_ppv": 0.06666666666666665
+        }
+      },
+      "0.3": {
+        "recall": 0.5,
+        "ppv": 0.5,
+        "auroc": 0.5644444444444445,
+        "n_labels": 63,
+        "label_error": 0.25396825396825395,
+        "gate": {
+          "passed": true,
+          "reasons": [],
+          "delta_recall": 0.0,
+          "delta_ppv": 0.0
+        }
+      }
+    }
+  },
+  "agreement": {
+    "0.0": {
+      "n_parts_multiply_reviewed": 83,
+      "exact_agreement": 0.8313253012048193,
+      "n_binary_comparable": 69,
+      "defect_or_not_agreement": 1.0
+    },
+    "0.05": {
+      "n_parts_multiply_reviewed": 83,
+      "exact_agreement": 0.8192771084337349,
+      "n_binary_comparable": 72,
+      "defect_or_not_agreement": 0.9444444444444444
+    },
+    "0.1": {
+      "n_parts_multiply_reviewed": 83,
+      "exact_agreement": 0.7469879518072289,
+      "n_binary_comparable": 72,
+      "defect_or_not_agreement": 0.8611111111111112
+    },
+    "0.2": {
+      "n_parts_multiply_reviewed": 83,
+      "exact_agreement": 0.6024096385542169,
+      "n_binary_comparable": 73,
+      "defect_or_not_agreement": 0.684931506849315
+    },
+    "0.3": {
+      "n_parts_multiply_reviewed": 83,
+      "exact_agreement": 0.5662650602409639,
+      "n_binary_comparable": 67,
+      "defect_or_not_agreement": 0.7014925373134329
+    }
+  },
+  "n_pool": 250,
+  "n_flagged": 113,
+  "n_reviewable": 83,
+  "threshold": 17.783294677734375,
+  "error_rates": [
+    0.0,
+    0.05,
+    0.1,
+    0.2,
+    0.3
+  ]
+}

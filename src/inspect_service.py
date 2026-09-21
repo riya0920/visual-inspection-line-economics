@@ -225,7 +225,9 @@ def _png_b64(arr: np.ndarray, cmap: str = "gray") -> str:
 
 def write_review_station(path: pathlib.Path, svc: InspectionService,
                          imgs: np.ndarray, labels: np.ndarray,
-                         masks: np.ndarray | None = None) -> dict:
+                         masks: np.ndarray | None = None, *,
+                         post_to: str | None = None,
+                         operator: str = "OP-07") -> dict:
     """A self-contained HTML review station.
 
     Self-contained on purpose -- one file, no server, no assets. An operator
@@ -270,6 +272,8 @@ def write_review_station(path: pathlib.Path, svc: InspectionService,
         </div>
       </div>""")
 
+    post_js = json.dumps(post_to)
+    op_js = json.dumps(operator)
     html = f"""<!doctype html>
 <meta charset="utf-8"><title>Review station</title>
 <style>
@@ -298,6 +302,7 @@ def write_review_station(path: pathlib.Path, svc: InspectionService,
            background:transparent; color:inherit; border-radius:5px; cursor:pointer; }}
  button:hover {{ background:var(--line); }}
  button.done {{ background:#3182ce; color:#fff; border-color:#3182ce; }}
+ button.failed {{ background:#c53030; color:#fff; border-color:#c53030; }}
  #log {{ margin-top:24px; font-family:ui-monospace,monospace; font-size:12px;
          white-space:pre-wrap; opacity:.8; }}
 </style>
@@ -307,21 +312,44 @@ def write_review_station(path: pathlib.Path, svc: InspectionService,
 <div class="grid">{''.join(cards)}</div>
 <div id="log">override log (empty)</div>
 <script>
+const POST_TO = {post_js};
+const OPERATOR = {op_js};
+const PAGE = String(Date.now());
 const entries = [];
-function dispose(part, d, btn) {{
-  entries.push({{part, disposition: d, at: new Date().toISOString()}});
-  [...btn.parentElement.children].forEach(b => b.classList.remove('done'));
-  btn.classList.add('done');
+function render() {{
   document.getElementById('log').textContent =
-    'override log (' + entries.length + ' entries)\\n' +
-    entries.map(e => e.at + '  ' + e.part + '  ' + e.disposition).join('\\n');
+    'override log (' + entries.length + ' entries' +
+    (POST_TO ? ', posting to ' + POST_TO : ', in-page only') + ')\n' +
+    entries.map(e => e.at + '  ' + e.part + '  ' + e.disposition +
+                     (e.error ? '  !! ' + e.error : '')).join('\n');
+}}
+function mark(btn, cls) {{
+  [...btn.parentElement.children].forEach(b => {{
+    b.classList.remove('done'); b.classList.remove('failed'); }});
+  btn.classList.add(cls);
+}}
+function dispose(part, d, btn) {{
+  const e = {{part, disposition: d, at: new Date().toISOString()}};
+  entries.push(e); mark(btn, 'done'); render();
+  if (!POST_TO) return;
+  // An idempotency key per (page load, part, operator, disposition): a
+  // double-clicked button is one opinion, not two, and two would show up
+  // downstream as an operator agreeing with themselves.
+  const key = PAGE + ':' + part + ':' + OPERATOR + ':' + d;
+  fetch(POST_TO, {{method: 'POST',
+                  headers: {{'Content-Type': 'application/json'}},
+                  body: JSON.stringify({{part_id: part, operator: OPERATOR,
+                                        disposition: d, idem_key: key}})}})
+    .then(r => r.ok ? r.json() : r.json().then(b => {{ throw b.error; }}))
+    .catch(err => {{ e.error = String(err); mark(btn, 'failed'); render(); }});
 }}
 </script>
 """
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(html, encoding="utf-8")
     return {"path": str(path), "bytes": path.stat().st_size,
-            "n_parts": int(len(imgs)), "self_contained": True}
+            "n_parts": int(len(imgs)), "self_contained": post_to is None,
+            "posts_to": post_to, "html": html}
 
 
 def write_container(root: pathlib.Path) -> dict:
